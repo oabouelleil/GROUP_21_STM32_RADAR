@@ -1,111 +1,42 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_host.h"
 
 /* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include <stdarg.h>
-#include "../../Drivers/BSP/STM32L476G-Discovery/stm32l476g_discovery_glass_lcd.h"
 #include "arm_common_tables.h"
 #include "arm_const_structs.h"
 #include "arm_math.h"
-/* USER CODE END Includes */
+#include "adc.h"
 
 /* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
-
-LCD_HandleTypeDef hlcd;
-
-UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_tx;
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 
 static void MX_GPIO_Init(void);
 
-static void MX_DMA_Init(void);
-
-static void MX_LCD_Init(void);
-
-static void MX_USART2_UART_Init(void);
-
-static void MX_ADC1_Init(void);
-
 void MX_USB_HOST_Process(void);
 
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
 int main(void) {
-    /* USER CODE BEGIN 1 */
-
-    /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
 
     /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
     HAL_Init();
 
-    /* USER CODE BEGIN Init */
-
-    /* USER CODE END Init */
-
     /* Configure the system clock */
     SystemClock_Config();
-
-    /* USER CODE BEGIN SysInit */
-
-    /* USER CODE END SysInit */
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
@@ -114,24 +45,18 @@ int main(void) {
     MX_USART2_UART_Init();
     MX_USB_HOST_Init();
     MX_ADC1_Init();
-    /* USER CODE BEGIN 2 */
+
     BSP_LCD_GLASS_Init();
     BSP_LCD_GLASS_Clear();
-    /* USER CODE END 2 */
+    INIT_ADC_DMA();
 
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
     while (1) {
-        HAL_UART_Transmit(&huart2, "A", sizeof(char), HAL_MAX_DELAY);
 
+        stub_printf(OUT_UART, "%.2f\n", voltageConversion(adc_buf[0]));
         HAL_Delay(200);
-
-        /* USER CODE END WHILE */
         MX_USB_HOST_Process();
 
-        /* USER CODE BEGIN 3 */
     }
-    /* USER CODE END 3 */
 }
 
 /**
@@ -203,153 +128,6 @@ void SystemClock_Config(void) {
     /** Enable MSI Auto calibration
     */
     HAL_RCCEx_EnableMSIPLLMode();
-}
-
-/**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ADC1_Init(void) {
-
-    /* USER CODE BEGIN ADC1_Init 0 */
-
-    /* USER CODE END ADC1_Init 0 */
-
-    ADC_MultiModeTypeDef multimode = {0};
-    ADC_ChannelConfTypeDef sConfig = {0};
-
-    /* USER CODE BEGIN ADC1_Init 1 */
-
-    /* USER CODE END ADC1_Init 1 */
-    /** Common config
-    */
-    hadc1.Instance = ADC1;
-    hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-    hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-    hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-    hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-    hadc1.Init.LowPowerAutoWait = DISABLE;
-    hadc1.Init.ContinuousConvMode = ENABLE;
-    hadc1.Init.NbrOfConversion = 1;
-    hadc1.Init.DiscontinuousConvMode = DISABLE;
-    hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-    hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-    hadc1.Init.DMAContinuousRequests = ENABLE;
-    hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-    hadc1.Init.OversamplingMode = DISABLE;
-    if (HAL_ADC_Init(&hadc1) != HAL_OK) {
-        Error_Handler();
-    }
-    /** Configure the ADC multi-mode
-    */
-    multimode.Mode = ADC_MODE_INDEPENDENT;
-    if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK) {
-        Error_Handler();
-    }
-    /** Configure Regular Channel
-    */
-    sConfig.Channel = ADC_CHANNEL_5;
-    sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
-    sConfig.SingleDiff = ADC_SINGLE_ENDED;
-    sConfig.OffsetNumber = ADC_OFFSET_NONE;
-    sConfig.Offset = 0;
-    if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
-        Error_Handler();
-    }
-    /* USER CODE BEGIN ADC1_Init 2 */
-
-    /* USER CODE END ADC1_Init 2 */
-
-}
-
-/**
-  * @brief LCD Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_LCD_Init(void) {
-
-    /* USER CODE BEGIN LCD_Init 0 */
-
-    /* USER CODE END LCD_Init 0 */
-
-    /* USER CODE BEGIN LCD_Init 1 */
-
-    /* USER CODE END LCD_Init 1 */
-    hlcd.Instance = LCD;
-    hlcd.Init.Prescaler = LCD_PRESCALER_1;
-    hlcd.Init.Divider = LCD_DIVIDER_16;
-    hlcd.Init.Duty = LCD_DUTY_1_4;
-    hlcd.Init.Bias = LCD_BIAS_1_4;
-    hlcd.Init.VoltageSource = LCD_VOLTAGESOURCE_INTERNAL;
-    hlcd.Init.Contrast = LCD_CONTRASTLEVEL_0;
-    hlcd.Init.DeadTime = LCD_DEADTIME_0;
-    hlcd.Init.PulseOnDuration = LCD_PULSEONDURATION_0;
-    hlcd.Init.MuxSegment = LCD_MUXSEGMENT_DISABLE;
-    hlcd.Init.BlinkMode = LCD_BLINKMODE_OFF;
-    hlcd.Init.BlinkFrequency = LCD_BLINKFREQUENCY_DIV8;
-    hlcd.Init.HighDrive = LCD_HIGHDRIVE_DISABLE;
-    if (HAL_LCD_Init(&hlcd) != HAL_OK) {
-        Error_Handler();
-    }
-    /* USER CODE BEGIN LCD_Init 2 */
-
-    /* USER CODE END LCD_Init 2 */
-
-}
-
-/**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void) {
-
-    /* USER CODE BEGIN USART2_Init 0 */
-
-    /* USER CODE END USART2_Init 0 */
-
-    /* USER CODE BEGIN USART2_Init 1 */
-
-    /* USER CODE END USART2_Init 1 */
-    huart2.Instance = USART2;
-    huart2.Init.BaudRate = 115200;
-    huart2.Init.WordLength = UART_WORDLENGTH_8B;
-    huart2.Init.StopBits = UART_STOPBITS_1;
-    huart2.Init.Parity = UART_PARITY_NONE;
-    huart2.Init.Mode = UART_MODE_TX_RX;
-    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-    huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-    huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-    if (HAL_UART_Init(&huart2) != HAL_OK) {
-        Error_Handler();
-    }
-    /* USER CODE BEGIN USART2_Init 2 */
-
-    /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void) {
-
-    /* DMA controller clock enable */
-    __HAL_RCC_DMA1_CLK_ENABLE();
-
-    /* DMA interrupt init */
-    /* DMA1_Channel1_IRQn interrupt configuration */
-    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-    /* DMA1_Channel7_IRQn interrupt configuration */
-    HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
-
 }
 
 /**
@@ -526,23 +304,6 @@ static void MX_GPIO_Init(void) {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(XL_INT_GPIO_Port, &GPIO_InitStruct);
 
-}
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void) {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
-    __disable_irq();
-    while (1) {
-    }
-    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
