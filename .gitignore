@@ -1,6 +1,7 @@
 ### Custom
 cmake-build-debug/
 .idea/*
+!lib/libarm_cortexM4lf_math.a
 # Created by .ignore support plugin (hsz.mobi)
 ### C template
 # Prerequisites

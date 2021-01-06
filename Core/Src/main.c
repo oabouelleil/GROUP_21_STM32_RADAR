@@ -26,6 +26,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "../../Drivers/BSP/STM32L476G-Discovery/stm32l476g_discovery_glass_lcd.h"
+#include "arm_common_tables.h"
+#include "arm_const_structs.h"
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
