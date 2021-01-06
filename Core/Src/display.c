@@ -11,14 +11,14 @@ volatile uint8_t FLAG_JOY_UPDATE = 0;
 int8_t displayMode = 0;
 int8_t displayData = 0;
 
-DISPLAY_StatusTypeDef DISPLAY_INIT(uint8_t peripherals) {
+DISPLAY_StatusTypeDef DISPLAY_Init(uint8_t peripherals_mask) {
 
     // Initialize UART in normal mode
-    if ((peripherals & INIT_UART) == INIT_UART) {
+    if ((peripherals_mask & INIT_UART) == INIT_UART) {
         MX_USART2_UART_Init();
     }
 
-    if ((peripherals & INIT_LCD) == INIT_LCD) {
+    if ((peripherals_mask & INIT_LCD) == INIT_LCD) {
         //redundant?
         MX_LCD_Init();
 
@@ -31,7 +31,7 @@ DISPLAY_StatusTypeDef DISPLAY_INIT(uint8_t peripherals) {
     BSP_LED_Init(LED_GREEN);
 
     // Initialize joystick in Interrupt mode
-    if ((peripherals & INIT_JOYSTICK) == INIT_JOYSTICK) {
+    if ((peripherals_mask & INIT_JOYSTICK) == INIT_JOYSTICK) {
         if (BSP_JOY_Init(JOY_MODE_EXTI) != HAL_OK) {
             // Toggle Red LED - Not good.
             BSP_LED_On(LED_RED);
@@ -50,8 +50,7 @@ DISPLAY_StatusTypeDef DISPLAY_INIT(uint8_t peripherals) {
 }
 
 
-DISPLAY_StatusTypeDef stub_printf(uint32_t out_device, char *format, ...)
-{
+DISPLAY_StatusTypeDef stub_printf(OutDevice_TypeDef out_device, char *format, ...) {
     char buffer[64]; //uint8_t * ?
 
     va_list args;
@@ -99,7 +98,7 @@ void display_data(float32_t radar_output_freq, int mode) {
     // https://www.sciencedirect.com/topics/engineering/doppler-frequency-shift
 
     // calculate the number of Doppler Hertz per m/s for this radar frequency
-    static float32_t doppler_freq_shift = 2.0f * CARRIER_FREQUENCY / SPEED_OF_LIGHT;
+    static const float32_t doppler_freq_shift = 2.0f * CARRIER_FREQUENCY / SPEED_OF_LIGHT;
 
     float32_t speed_mps, speed_mph, speed_kmh;
 
@@ -138,7 +137,7 @@ void display_data(float32_t radar_output_freq, int mode) {
     }
 }
 
-
+// called by interrupt handler
 inline void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     BSP_LED_Toggle(LED_RED);
     BSP_LCD_GLASS_Clear();
@@ -146,7 +145,6 @@ inline void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     FLAG_JOY_UPDATE = 1;
 
     // check which button was pressed
-    // JoyState = BSP_JOY_GetState();
     JoyState = (uint8_t) GPIO_Pin;
 
     // Clear IO Expander IT
@@ -154,7 +152,7 @@ inline void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 }
 
 
-void menuUp() {
+void menuUp(void) {
     displayMode--;
     if (displayMode < 0) displayMode = 3;
     if (displayData == 0) {
@@ -175,7 +173,7 @@ void menuUp() {
     } else display_data(100, displayMode);
 }
 
-void menuDown() {
+void menuDown(void) {
     displayMode++;
     if (displayMode > 3) displayMode = 0;
     if (displayData == 0) {
@@ -196,7 +194,7 @@ void menuDown() {
     } else display_data(100, displayMode);
 }
 
-void menuLeft() {
+void menuLeft(void) {
     displayData = 0;
     switch (displayMode) {
         case (0):
@@ -211,6 +209,9 @@ void menuLeft() {
         case (3):
             stub_printf(OUT_LCD, "Hz");
             break;
+        default:
+            //panic?
+            break;
     }
 }
 
@@ -218,16 +219,11 @@ void menuLeft() {
   * @brief LCD Initialization Function
   * @param None
   * @retval None
-  */ //static?
+  *
+  * @license CubeMX auto generated - (C) COPYRIGHT STMicroelectronics
+  */
 void MX_LCD_Init(void) {
 
-    /* USER CODE BEGIN LCD_Init 0 */
-
-    /* USER CODE END LCD_Init 0 */
-
-    /* USER CODE BEGIN LCD_Init 1 */
-
-    /* USER CODE END LCD_Init 1 */
     hlcd.Instance = LCD;
     hlcd.Init.Prescaler = LCD_PRESCALER_1;
     hlcd.Init.Divider = LCD_DIVIDER_16;
@@ -254,16 +250,11 @@ void MX_LCD_Init(void) {
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
-  */ //static?
+  *
+  * @license CubeMX auto generated - (C) COPYRIGHT STMicroelectronics
+  */
 void MX_USART2_UART_Init(void) {
 
-    /* USER CODE BEGIN USART2_Init 0 */
-
-    /* USER CODE END USART2_Init 0 */
-
-    /* USER CODE BEGIN USART2_Init 1 */
-
-    /* USER CODE END USART2_Init 1 */
     huart2.Instance = USART2;
     huart2.Init.BaudRate = 115200;
     huart2.Init.WordLength = UART_WORDLENGTH_8B;
@@ -277,8 +268,4 @@ void MX_USART2_UART_Init(void) {
     if (HAL_UART_Init(&huart2) != HAL_OK) {
         Error_Handler();
     }
-    /* USER CODE BEGIN USART2_Init 2 */
-
-    /* USER CODE END USART2_Init 2 */
-
 }
