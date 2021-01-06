@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <stdarg.h>
+#include "processing.h"
 #include "../../Drivers/BSP/STM32L476G-Discovery/stm32l476g_discovery_glass_lcd.h"
 #include "arm_common_tables.h"
 #include "arm_const_structs.h"
@@ -55,6 +56,7 @@ UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
+uint16_t stub_adc_readings_buffer[4096];
 
 /* USER CODE END PV */
 
@@ -122,7 +124,18 @@ int main(void) {
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1) {
-        HAL_UART_Transmit(&huart2, "A", sizeof(char), HAL_MAX_DELAY);
+        memset(stub_adc_readings_buffer, 3, 4096 * sizeof(uint16_t));
+        float32_t frequency = 0.0f;
+        float32_t average = 0.0f;
+        float32_t output[4096];
+        uint32_t maxIndex = 0;// index of largest bin
+        doFFT(stub_adc_readings_buffer, &frequency, &average, output, &maxIndex, 0);
+//
+        char freqStr[10];
+        sprintf(freqStr, "%f\n", frequency);
+
+        HAL_UART_Transmit(&huart2, (uint8_t *) freqStr, strlen(freqStr), HAL_MAX_DELAY);
+//        HAL_UART_Transmit(&huart2, "A\n", sizeof(char) * 2, HAL_MAX_DELAY);
 
         HAL_Delay(200);
 
