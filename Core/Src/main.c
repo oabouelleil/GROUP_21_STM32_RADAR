@@ -5,6 +5,7 @@
 
 // private function declarations
 static void SystemClock_Config(void);
+
 static void MX_GPIO_Init(void);
 
 /**
@@ -286,7 +287,9 @@ _Noreturn void PANIC(uint8_t trace) {
     BSP_LED_On(LED_RED);
 
     stub_printf(OUT_LCD, "PANIC");
-    for (;;); //halt - disable interrupts, reset?
+    
+    __disable_irq();
+    for (;;); //halt - reset?
 }
 
 
