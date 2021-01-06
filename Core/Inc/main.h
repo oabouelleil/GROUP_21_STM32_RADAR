@@ -32,7 +32,9 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -51,7 +53,7 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+_Noreturn void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
@@ -209,6 +211,8 @@ void Error_Handler(void);
 #define XL_INT_Pin GPIO_PIN_1
 #define XL_INT_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
+
+typedef float float32_t; //TODO float32_t
 
 /* USER CODE END Private defines */
 
