@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -23,7 +23,7 @@
 #define __STM32L4xx_IT_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Private includes ----------------------------------------------------------*/
@@ -48,20 +48,31 @@
 
 /* Exported functions prototypes ---------------------------------------------*/
 void NMI_Handler(void);
-void HardFault_Handler(void);
-void MemManage_Handler(void);
-void BusFault_Handler(void);
-void UsageFault_Handler(void);
-void SVC_Handler(void);
-void DebugMon_Handler(void);
-void PendSV_Handler(void);
-void SysTick_Handler(void);
-void DMA1_Channel1_IRQHandler(void);
-void DMA1_Channel7_IRQHandler(void);
-void ADC1_2_IRQHandler(void);
-void OTG_FS_IRQHandler(void);
-/* USER CODE BEGIN EFP */
 
+void HardFault_Handler(void);
+
+void MemManage_Handler(void);
+
+void BusFault_Handler(void);
+
+void UsageFault_Handler(void);
+
+void SVC_Handler(void);
+
+void DebugMon_Handler(void);
+
+void PendSV_Handler(void);
+
+void SysTick_Handler(void);
+
+void OTG_FS_IRQHandler(void);
+
+/* USER CODE BEGIN EFP */
+void EXTI0_1_IRQHandler(void);
+
+void EXTI2_3_IRQHandler(void);
+
+void EXTI4_15_IRQHandler(void);
 /* USER CODE END EFP */
 
 #ifdef __cplusplus
