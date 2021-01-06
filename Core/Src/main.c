@@ -46,7 +46,7 @@ int main(void) {
                     menuDown();
                     break;
                 case (RIGHT_JOY_PIN): // RIGHT
-                    display_data(100, displayMode);
+                    menuRight(100, displayMode);
                     break;
                 case (LEFT_JOY_PIN): // LEFT
                     menuLeft();

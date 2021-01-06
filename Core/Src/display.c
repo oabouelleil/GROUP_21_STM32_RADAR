@@ -92,7 +92,7 @@ uint8_t get_display_mode(int mode) {
 }
 
 
-void display_data(float32_t radar_output_freq, int mode) {
+void menuRight(float32_t radar_output_freq, int mode) {
     displayData = 1;
     // ================ maths ====================
     // https://www.sciencedirect.com/topics/engineering/doppler-frequency-shift
@@ -170,7 +170,7 @@ void menuUp(void) {
                 stub_printf(OUT_LCD, "Hz");
                 break;
         }
-    } else display_data(100, displayMode);
+    } else menuRight(100, displayMode);
 }
 
 void menuDown(void) {
@@ -191,7 +191,7 @@ void menuDown(void) {
                 stub_printf(OUT_LCD, "Hz");
                 break;
         }
-    } else display_data(100, displayMode);
+    } else menuRight(100, displayMode);
 }
 
 void menuLeft(void) {

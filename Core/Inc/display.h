@@ -88,12 +88,12 @@ DISPLAY_StatusTypeDef stub_printf(OutDevice_TypeDef out_device, char *format, ..
 uint8_t get_display_mode(int mode);
 
 /**
- * @brief process radar output and print to menu
+ * @brief process radar output and print to menu (display data)
  *
  * @param radar_output_freq: output from the radar module in hertz
  * @param mode: menu mode
  */
-void display_data(float32_t radar_output_freq, int mode);
+void menuRight(float32_t radar_output_freq, int mode);
 
 /// @brief go up in the menu (joystick up button)
 void menuUp(void);
@@ -101,7 +101,7 @@ void menuUp(void);
 /// @brief go down in the menu (joystick up button)
 void menuDown(void);
 
-/// @brief go left??? XXX in the menu (joystick up button)
+/// @brief go left in the menu (joystick up button)
 void menuLeft(void);
 
 
