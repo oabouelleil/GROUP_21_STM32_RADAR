@@ -46,7 +46,7 @@ else ()
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(USB_HOST/App USB_HOST/Target Core/Inc Drivers/STM32L4xx_HAL_Driver/Inc Drivers/STM32L4xx_HAL_Driver/Inc/Legacy Middlewares/ST/STM32_USB_Host_Library/Core/Inc Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc Drivers/CMSIS/Device/ST/STM32L4xx/Include Drivers/CMSIS/Include)
+include_directories(USB_HOST/App USB_HOST/Target Core/Inc Drivers/STM32L4xx_HAL_Driver/Inc Drivers/BSP Drivers/STM32L4xx_HAL_Driver/Inc/Legacy Middlewares/ST/STM32_USB_Host_Library/Core/Inc Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc Drivers/CMSIS/Device/ST/STM32L4xx/Include Drivers/CMSIS/Include)
 
 add_definitions(-DUSE_HAL_DRIVER -DSTM32L476xx)
 
