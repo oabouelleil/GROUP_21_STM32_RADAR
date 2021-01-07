@@ -39,6 +39,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+typedef float float32_t; //TODO find current FPU situation
 
 /* USER CODE END ET */
 
@@ -53,9 +54,10 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-_Noreturn void Error_Handler(void);
+void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void PANIC(uint8_t trace);
 
 /* USER CODE END EFP */
 
@@ -212,7 +214,6 @@ _Noreturn void Error_Handler(void);
 #define XL_INT_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 
-typedef float float32_t; //TODO float32_t
 
 /* USER CODE END Private defines */
 

@@ -5,8 +5,8 @@
 
 // private function declarations
 static void SystemClock_Config(void);
-
 static void MX_GPIO_Init(void);
+
 
 /**
   * @brief  Application entry point.
@@ -25,12 +25,14 @@ int main(void) {
     // Initialize configured peripherals
     MX_GPIO_Init();
     MX_USB_HOST_Init();
-    DISPLAY_Init(INIT_ALL);
+
+    if ( DISPLAY_Init(INIT_ALL) != DISPLAY_OK )
+        PANIC(66);
     //  ======================================================
 
 
     // signal Init complete
-    stub_printf(OUT_LCD, "init");
+    display_printf(OUT_LCD, "init");
 
     while (1) {
         /// @TODO is USB needed?
@@ -286,8 +288,8 @@ _Noreturn void PANIC(uint8_t trace) {
     BSP_LED_Off(LED_GREEN);
     BSP_LED_On(LED_RED);
 
-    stub_printf(OUT_LCD, "PANIC");
-    
+    display_printf(OUT_LCD, "PANIC");
+
     __disable_irq();
     for (;;); //halt - reset?
 }
@@ -296,6 +298,8 @@ _Noreturn void PANIC(uint8_t trace) {
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
+  *
+  * @note used in external libraries, do not refactor!
   */
 void Error_Handler(void) {
     PANIC(0);

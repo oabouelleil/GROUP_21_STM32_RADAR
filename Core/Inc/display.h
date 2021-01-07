@@ -7,7 +7,7 @@
 #include "STM32L476G-Discovery/stm32l476g_discovery_glass_lcd.h"
 
 /// @internal should probably live in main.h (global_defines.h?)
-typedef float float32_t;                           // TODO find out current fpu situation
+typedef float float32_t;                           // TODO find out current FPU situation
 
 #define CARRIER_FREQUENCY     10587000000.0f       // 10.587GHz
 #define SPEED_OF_LIGHT        299792458.0f         // francesco virgolini
@@ -19,7 +19,7 @@ typedef float float32_t;                           // TODO find out current fpu 
 #define INIT_JOYSTICK         (1u << 0u)  // 2^0, bit 0, (unsigned) 0x00
 #define INIT_LCD              (1u << 1u)  // 2^1, bit 1
 #define INIT_UART             (1u << 2u)  // 2^2, bit 2
-#define INIT_UART_DMA         (1u << 3u)  // 2^3, bit 3 // TODO
+#define INIT_UART_DMA         (1u << 3u)  // 2^3, bit 3 // TODO - when ADC is implemented
 #define INIT_UART_IT          (1u << 4u)  // 2^4, bit 4 // TODO
 #define INIT_USB              (1u << 5u)  // 2^5, bit 5 // TODO
 #define INIT_AUDIO            (1u << 6u)  // 2^6, bit 6 // TODO
@@ -41,6 +41,11 @@ extern int8_t displayData;
 typedef enum {
     DISPLAY_OK = 0x00,
     DISPLAY_ERROR = 0x01,
+    DISPLAY_JOY_ERROR,
+    DISPLAY_LCD_ERROR,
+    DISPLAY_UART_ERROR,
+    DISPLAY_USB_ERROR,
+    DISPLAY_AUDIO_ERROR
 } DISPLAY_StatusTypeDef;
 
 /// @brief output device options enum
@@ -56,10 +61,9 @@ enum {
     DISPLAY_MODE_MPH, DISPLAY_MODE_KMH, DISPLAY_MODE_MPS, DISPLAY_MODE_HZ
 };
 
-/// @internal Peripheral initialization (should be called through DISPLAY_Init)
-static void MX_USART2_UART_Init(void);
-
-static void MX_LCD_Init(void);
+/// @internal Peripheral initialization (should be called through DISPLAY_Init - static)
+static HAL_StatusTypeDef MX_USART2_UART_Init(void);
+static HAL_StatusTypeDef MX_LCD_Init(void);
 
 /**
  * @brief initialize display peripheraals
@@ -82,7 +86,15 @@ DISPLAY_StatusTypeDef DISPLAY_Init(uint8_t peripherals_mask);
  *
  * @internal 32bit enum fields might seem overkill but is processed faster in stm32
  */
-DISPLAY_StatusTypeDef stub_printf(OutDevice_TypeDef out_device, char *format, ...);
+DISPLAY_StatusTypeDef display_printf(OutDevice_TypeDef out_device, char *format, ...);
+
+/**
+ * TODO
+ * @brief display horizontal bars on LCD depicting signal level
+ * @param confidence (2 bit resolution)
+ */
+void stub_display_signal_level(int confidence);
+
 
 /// @brief STUB
 uint8_t get_display_mode(int mode);
