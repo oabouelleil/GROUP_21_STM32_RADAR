@@ -38,21 +38,21 @@ int main(void) {
     /* Configure the system clock */
     SystemClock_Config();
 
-    /* Initialize all configured peripherals */
+    /* Initialize other configured peripherals */
     MX_GPIO_Init();
-    MX_DMA_Init();
-    MX_LCD_Init();
-    MX_USART2_UART_Init();
     MX_USB_HOST_Init();
-    MX_ADC1_Init();
 
-    BSP_LCD_GLASS_Init();
-    BSP_LCD_GLASS_Clear();
-    INIT_ADC_DMA();
+    // custom initialize ADC
+    if (ADC_Init() != ADC_OK) {
+        Error_Handler();
+    }
 
     while (1) {
 
+        // print one ADC reading to UART and LCD
         stub_printf(OUT_UART, "%.2f\n", voltageConversion(adc_buf[0]));
+        stub_printf(OUT_LCD, "%.2f\n", voltageConversion(adc_buf[0]));
+
         HAL_Delay(200);
         MX_USB_HOST_Process();
 
@@ -305,6 +305,21 @@ static void MX_GPIO_Init(void) {
     HAL_GPIO_Init(XL_INT_GPIO_Port, &GPIO_InitStruct);
 
 }
+
+
+/**
+  * @brief  This function is executed in case of error occurrence. Disable interrupts and halt
+  * @retval None
+  */
+void Error_Handler(void) {
+    // disable interrupts
+    __disable_irq();
+
+    //halt - reset?
+    while (1) {
+    }
+}
+
 
 #ifdef  USE_FULL_ASSERT
 /**

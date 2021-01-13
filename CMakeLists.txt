@@ -46,9 +46,9 @@ else ()
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(USB_HOST/App USB_HOST/Target Core/Inc Drivers/STM32L4xx_HAL_Driver/Inc Drivers/BSP Drivers/STM32L4xx_HAL_Driver/Inc/Legacy Middlewares/ST/STM32_USB_Host_Library/Core/Inc Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc Drivers/CMSIS/Device/ST/STM32L4xx/Include Drivers/CMSIS/Include)
+include_directories(USB_HOST/App USB_HOST/Target Core/Inc Drivers/STM32L4xx_HAL_Driver/Inc Drivers/STM32L4xx_HAL_Driver/Inc/Legacy Middlewares/ST/STM32_USB_Host_Library/Core/Inc Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc Drivers/CMSIS/Device/ST/STM32L4xx/Include Drivers/CMSIS/Include)
 
-add_definitions(-DUSE_HAL_DRIVER -DSTM32L476xx -DARM_MATH_CM4)
+add_definitions(-DUSE_HAL_DRIVER -DSTM32L476xx)
 
 file(GLOB_RECURSE SOURCES "startup/*.*" "USB_HOST/*.*" "Middlewares/*.*" "Drivers/*.*" "Core/*.*")
 
@@ -57,8 +57,6 @@ set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32L476VGTx_FLASH.ld)
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
 add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
 add_link_options(-T ${LINKER_SCRIPT})
-link_directories(lib)
-link_libraries(arm_cortexM4lf_math)
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 

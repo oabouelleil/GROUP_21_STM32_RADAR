@@ -10,27 +10,40 @@ LCD_HandleTypeDef hlcd;
 
 uint16_t adc_buf[ADC_BUF_LEN];
 
+ADC_StatusTypeDef ADC_Init() {
+    // init DMA, ADC
+    MX_DMA_Init();
+    MX_ADC1_Init();
 
-void INIT_ADC_DMA() {
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) adc_buf, ADC_BUF_LEN);
+    // Init ADC_DMA mode and wrap HAL return status
+    HAL_StatusTypeDef ret = HAL_ADC_Start_DMA(&hadc1, (uint32_t *) adc_buf, ADC_BUF_LEN);
+
+    // initialize UART
+    MX_USART2_UART_Init();
+
+    // intialize display
+    MX_LCD_Init();
+    BSP_LCD_GLASS_Init();
+    BSP_LCD_GLASS_Clear();
+
+    if (ret == HAL_OK)
+        return ADC_OK;
+    else return ADC_ERROR;
 }
 
-/**
- *
- * @param - out_device: The medium to be printed through
- * @param - format: Formatted string
- * @param - ...: Arguments
- * @return 0 or 1 depending on the peripheral availability
- */
+
 uint8_t stub_printf(uint32_t out_device, char *format, ...) {
 
+    // task5 dynamically allocates this
     char buffer[64];
 
+    // support format string
     va_list args;
     va_start(args, format);
     vsprintf(buffer, format, args);
     va_end(args);
 
+    // select output device
     switch (out_device) {
         case OUT_LCD:
             BSP_LCD_GLASS_Clear();
@@ -46,30 +59,11 @@ uint8_t stub_printf(uint32_t out_device, char *format, ...) {
     return 0;
 }
 
-/**
- *
- * @param - digitalVoltage: 0 to 4095
- * @return - Analog voltage from digital signal
- */
 float voltageConversion(uint16_t digitalVoltage) {
+    // 12 bits -> 2^12 = 4096
     return digitalVoltage * 3.3 / 4095;
 }
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void) {
-    __disable_irq();
-    while (1) {
-    }
-}
-
-/**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
 void MX_ADC1_Init(void) {
 
     /* USER CODE BEGIN ADC1_Init 0 */
@@ -125,11 +119,7 @@ void MX_ADC1_Init(void) {
 
 }
 
-/**
-  * @brief LCD Initialization Function
-  * @param None
-  * @retval None
-  */
+
 void MX_LCD_Init(void) {
 
     hlcd.Instance = LCD;
@@ -151,11 +141,7 @@ void MX_LCD_Init(void) {
 
 }
 
-/**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
+
 void MX_USART2_UART_Init(void) {
 
     huart2.Instance = USART2;
@@ -173,9 +159,7 @@ void MX_USART2_UART_Init(void) {
     }
 }
 
-/**
-  * Enable DMA controller clock
-  */
+
 void MX_DMA_Init(void) {
 
     __HAL_RCC_DMA1_CLK_ENABLE();
