@@ -1,11 +1,51 @@
-//
-// Created by oabou on 06/01/2021.
-//
-
 #include <stdlib.h>
 #include "processing.h"
 
-void generateTestData(float32_t *buffer) {
+
+void doFFT(uint16_t *inputBuffer, float32_t *frequency, float32_t *average, float32_t output[], uint32_t *maxIndex) {
+    float32_t maxValue;
+    uint16_t fftLength = arm_cfft_sR_f32_len4096.fftLen;
+
+    // Buffer to store adc sample, every other value is an unused imaginary value
+    float32_t complexBuffer[FFT_MAX_SIZE * 2];
+
+    makeComplexBuffer(inputBuffer, complexBuffer, fftLength);
+
+    // Fill complexBuffer with testing data
+    // ONLY UNCOMMENT WHEN TESTING
+    stub_generateTestData(complexBuffer);
+
+    // Process the data through the CFFT/CIFFT module
+    arm_cfft_f32(&arm_cfft_sR_f32_len4096, complexBuffer, 0, 1);
+
+    // Process the data through the Complex Magnitude Module for
+    //  calculating the magnitude at each bin
+    arm_cmplx_mag_f32(complexBuffer, output, fftLength);
+
+    // Ignore the DC Value
+    output[0] = 0.0f;
+
+    // Ignore frequencies below 100 Hz
+    uint16_t n, top;
+    top = 10; //(50*SAMPLE_RATE)/fftLength;
+    for (n = 0; n < top; n++) {
+        output[n] = 0.0f;
+    }
+
+    // Calculates maxValue and returns corresponding BIN value
+    arm_max_f32(output, fftLength / 2, &maxValue, maxIndex);
+
+    // Calculate frequency value of peak bin
+    float32_t nyquistFrequency = SAMPLE_RATE / 2;
+    float32_t hertzPerBin = nyquistFrequency / ((float) fftLength / 2);
+
+    *frequency = hertzPerBin * (float32_t) *maxIndex;
+
+    arm_mean_f32(output, fftLength, average);
+}
+
+
+void stub_generateTestData(float32_t *buffer) {
     static float32_t angle = 0.0f;
     static float32_t frequency = 388.0f; // Hz
     uint16_t i;
@@ -48,47 +88,4 @@ void makeComplexBuffer(uint16_t *buffer, float32_t *output, uint16_t fftLength) 
         // Set imaginary part to 0
         output[i + 1] = 0.0f;
     }
-}
-
-void doFFT(uint16_t *inputBuffer, float32_t *frequency, float32_t *average, float32_t output[], uint32_t *maxIndex,
-           uint16_t fftLengthIndex) {
-    float32_t maxValue;
-    uint16_t fftLength = arm_cfft_sR_f32_len4096.fftLen;
-
-    // Buffer to store adc sample, every other value is an unused imaginary value
-    float32_t complexBuffer[FFT_MAX_SIZE * 2];
-
-    makeComplexBuffer(inputBuffer, complexBuffer, fftLength);
-
-    // Fill complexBuffer with testing data
-    // ONLY UNCOMMENT WHEN TESTING
-    generateTestData(complexBuffer);
-
-    // Process the data through the CFFT/CIFFT module
-    arm_cfft_f32(&arm_cfft_sR_f32_len4096, complexBuffer, 0, 1);
-
-    // Process the data through the Complex Magnitude Module for
-    //  calculating the magnitude at each bin
-    arm_cmplx_mag_f32(complexBuffer, output, fftLength);
-
-    // Ignore the DC Value
-    output[0] = 0.0f;
-
-    // Ignore frequencies below 100 Hz
-    uint16_t n, top;
-    top = 10; //(50*SAMPLE_RATE)/fftLength;
-    for (n = 0; n < top; n++) {
-        output[n] = 0.0f;
-    }
-
-    // Calculates maxValue and returns corresponding BIN value
-    arm_max_f32(output, fftLength / 2, &maxValue, maxIndex);
-
-    // Calculate frequency value of peak bin
-    float32_t nyquistFrequency = SAMPLE_RATE / 2;
-    float32_t hertzPerBin = nyquistFrequency / ((float) fftLength / 2);
-
-    *frequency = hertzPerBin * (float32_t) *maxIndex;
-
-    arm_mean_f32(output, fftLength, average);
 }
