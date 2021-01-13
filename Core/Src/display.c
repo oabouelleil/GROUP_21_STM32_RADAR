@@ -8,7 +8,7 @@ UART_HandleTypeDef huart2;
 volatile uint8_t JoyState = 0;
 volatile uint8_t FLAG_JOY_UPDATE = 0;
 
-
+// menu position placeholder (y, x). TODO use matrix lingo for menu
 int8_t displayMode = 0;
 int8_t displayData = 0;
 

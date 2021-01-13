@@ -5,6 +5,7 @@
 
 // private function declarations
 static void SystemClock_Config(void);
+
 static void MX_GPIO_Init(void);
 
 
@@ -22,12 +23,15 @@ int main(void) {
     // Configure the system clock
     SystemClock_Config();
 
-    // Initialize configured peripherals
+    // Initialize other configured peripherals
     MX_GPIO_Init();
     MX_USB_HOST_Init();
 
-    if ( DISPLAY_Init(INIT_ALL) != DISPLAY_OK )
+    // Initialize display routines related peripherals
+    if (DISPLAY_Init(INIT_ALL) != DISPLAY_OK) {
+        // panic if display was not initialized succesully
         PANIC(66);
+    }
     //  ======================================================
 
 
@@ -38,20 +42,24 @@ int main(void) {
         /// @TODO is USB needed?
         MX_USB_HOST_Process();
 
+        // POC react to joystick and update menu.
+        // TODO: set up a PIT driven irq handler to update the menu automatically on the background without polling
+        //  FLAG_JOY_UPDATE in the main loop.
         while (FLAG_JOY_UPDATE) {
             switch (JoyState) {
-                case (SEL_JOY_PIN): //JOY_SEL
+                case (SEL_JOY_PIN):  //JOY_SEL
                     break;
-                case (UP_JOY_PIN): //JOY_UP
+                case (UP_JOY_PIN):   //JOY_UP
                     menuUp();
                     break;
                 case (DOWN_JOY_PIN): // JOY_DOWN
                     menuDown();
                     break;
                 case (RIGHT_JOY_PIN): // RIGHT
+                    // dummy frequency
                     menuRight(100, displayMode);
                     break;
-                case (LEFT_JOY_PIN): // LEFT
+                case (LEFT_JOY_PIN):  // LEFT
                     menuLeft();
                 default:
                     break;
@@ -285,9 +293,11 @@ static void MX_GPIO_Init(void) {
 _Noreturn void PANIC(uint8_t trace) {
     (void) trace;
 
+    // DBG: shut down green LED, turn red LED on
     BSP_LED_Off(LED_GREEN);
     BSP_LED_On(LED_RED);
 
+    // attempt panic print TODO (might fault loop without disabling irq? - catch triple fault from trace)
     display_printf(OUT_LCD, "PANIC");
 
     __disable_irq();
